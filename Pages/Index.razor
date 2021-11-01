@@ -1,0 +1,17 @@
+@page "/"
+
+<AuthorizeView>
+    @* Lo que ven los que NO estan logueados *@
+    <NotAuthorized>
+        @{
+            nm.NavigateTo("/Identity/Account/Login");
+        }
+    </NotAuthorized>
+
+    @* Lo que ven los que estan logueados *@
+    <Authorized>
+        @{
+            nm.NavigateTo("/Menu");
+        }
+    </Authorized>
+</AuthorizeView>

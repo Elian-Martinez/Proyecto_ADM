@@ -1,0 +1,5 @@
+﻿<StaticWebAssets Version="1.0">
+  <ContentRoot BasePath="_content/CurrieTechnologies.Razor.SweetAlert2" Path="C:\Users\HP 15-BS191DX\.nuget\packages\currietechnologies.razor.sweetalert2\4.4.0\build\..\staticwebassets\" />
+  <ContentRoot BasePath="/" Path="C:\Users\HP 15-BS191DX\Desktop\Proyecto_Final\Programacion-III-Proyecto-Final\obj\Debug\net5.0\scopedcss\bundle\" />
+  <ContentRoot BasePath="/Identity" Path="C:\Users\HP 15-BS191DX\.nuget\packages\microsoft.aspnetcore.identity.ui\5.0.5\staticwebassets\V4\" />
+</StaticWebAssets>

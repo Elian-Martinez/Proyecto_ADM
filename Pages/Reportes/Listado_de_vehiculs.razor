@@ -1,0 +1,91 @@
+@page "/reporte1"
+<br>
+<br>
+<h1 style="color:black;", FONT FACE="small fonts"><strong>Listado de Vehiculos disponibles</strong></h1>
+<div>
+    Fecha Inicio: <input type="date" @bind-value="Fechai" @oninput="cambioFechaInicio" />
+    Fecha Final: <input type="date" @bind-value="fechaf"@oninput="cambioFechaFin" />
+</div>
+<img src="imgs/clients.png" class="Backgroundclientes" alt="">
+<div class="tabla-registro" id="tablamodal">
+    <a href="/listado-reportes"> <i class="fas fa-arrow-left"></i></a>
+    <div class="contenido-tabla-registro">
+
+        @if (vehiculos == null) {
+            <Cargando></Cargando>
+        }
+
+        else {
+            <h1 style="color: black;">Datos Relevantes</h1>
+
+            <table style="width:100%; height:auto;" class="Tabla-Monto_Debido">
+                <thead>
+                    <tr class="Tabla-Cabeza">
+                        <th>ID</th>
+                        <th>Foto</th>
+                        <th >Marca</th>
+                        <th>Modelo</th>
+                        <th>Color</th>
+                        <th>Año</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var v in vehiculosDisponibles)
+                    {
+                        <tr class="Tabla-Pie">
+                            <td>@v.Id</td>
+                            <td>
+                                <img src="@v.Foto" width="60px" height="60px" style="object-fit: cover;" class="m-1">
+                            </td>
+                            <td>@v.Marca</td>
+                            <td>@v.Modelo</td>
+                            <td>@v.Año</td>
+                            <td>@v.Color</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        }
+
+    </div>
+
+</div>
+
+
+
+@code{
+    private List<Vehiculo> vehiculos = null;
+    private List<Vehiculo> vehiculosDisponibles = null;
+
+    public DateTime Fechai = DateTime.Now.Date;
+    public DateTime fechaf = DateTime.Now.Date.AddDays(7);
+
+    protected override async Task OnInitializedAsync()
+    {
+        vehiculos = await sc.Vehiculos.Include("Reservaciones").Where(v => v.Habilitado).ToListAsync();
+        filtrarVehiculosDisponibles();
+    }
+    private void filtrarVehiculosDisponibles()
+    {
+        vehiculosDisponibles = vehiculos.Where(
+            v => !v.Reservaciones.Any(
+                r => Math.Max(r.FechaInicio.Ticks, Fechai.Ticks)
+                    <= Math.Min(r.FechaFin.Ticks, fechaf.Ticks)))
+        .ToList();
+    }
+
+    private void cambioFechaInicio(ChangeEventArgs e)
+    {
+        Fechai = Convert.ToDateTime(e.Value);
+        filtrarVehiculosDisponibles();
+    }
+
+    private void cambioFechaFin(ChangeEventArgs e)
+    {
+        fechaf = Convert.ToDateTime(e.Value);
+        filtrarVehiculosDisponibles();
+    }
+}

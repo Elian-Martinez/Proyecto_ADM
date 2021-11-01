@@ -1,0 +1,218 @@
+@page "/listado-reservaciones"
+@attribute [Authorize]
+
+
+@if (reservaciones == null)
+{
+    <Cargando></Cargando>
+}
+else
+{
+    <div class="tabla-registro" id="tablamodal">
+        <a href="/menu"> <i class="fas fa-arrow-left"></i></a>
+
+        <div class="contenido-tabla-registro">
+            <h2>Listado de Reservaciones</h2>
+            <div class="row">
+                <select class="col-md-3 form-control offset-md-1 Selectsss" @bind="campoFiltro">
+                    <option value="Estado">Estado</option>
+                    <option value="FechaInicioCorta">Fecha Inicial</option>
+                    <option value="FechaFinCorta">Fecha Final</option>
+                    <option value="Cliente.Cedula">Cedula del Cliente</option>
+                    <option value="Vehiculo.Matricula">Matriculo del Vehiculo</option>
+                    <option value="MontoTotal">Monto Total</option>
+                    <option value="MontoPagado">Monto Pagado</option>
+                </select>
+                <input type="text" class="col-md-7 form-control" @bind-value="textoFiltro" @oninput="filtrarReservaciones">
+            </div>
+            <hr>
+
+            @if (reservacionesFiltradas.Count == 0)
+            {
+                <div class="text-center">
+                    <h3>No se han encontrado Resultados con esas Especificaciones</h3>
+                </div>
+            }
+
+
+            @foreach (var r in reservacionesFiltradas)
+            {
+
+                <table class="Tabla-Presentacion">
+                    <tr class="Tabla-Cabeza">
+                        <td>Estado</td>
+                        <td>Fecha Inicial</td>
+                        <td>Fecha Final</td>
+                        <td>Foto</td>
+                        <td>Cedula</td>
+                        <td>Nombre</td>
+                    </tr>
+                    <tr class="Tabla-Pie">
+                        <td>@r.Estado</td>
+                        <td>@r.FechaInicioCorta</td>
+                        <td>@r.FechaFinCorta</td>
+                        <td>
+                            <img src="@r.Cliente.FotoPersona" width="70px" height="70px" style="object-fit: cover;" />
+                        </td>
+                        <td>@r.Cliente.Cedula</td>
+                        <td>@r.Cliente.NombreCompleto</td>
+                    </tr>
+                    <tr class="Tabla-Cabeza">
+                        <td>Foto</td>
+                        <td>Matricula</td>
+                        <td>Vehiculo</td>
+                        <td>Monto Pagado</td>
+                        <td>Monto Total</td>
+                        <td>
+                            @if (!r.Pagada) {
+                                <button @onclick="() => Pagando(r)" class="btn btn-dark">
+                                    @(((r.MontoPagado > 0)) ? "Completar Pago":"Pagar")
+                                </button>
+                            } else {
+                                <button class="btn btn-success" disabled>
+                                    Pagada
+                                </button>
+                            }
+
+                        </td>
+                    </tr>
+                    <tr class="Tabla-Pie">
+
+                        <td>
+                            <img src="@r.Vehiculo.Foto" width="70px" height="70px" style="object-fit: cover;" />
+                        </td>
+                        <td>@r.Vehiculo.Matricula</td>
+                        <td>@r.Vehiculo.Informacion</td>
+                        <td>@r.MontoPagado.ToString("C0")</td>
+                        <td>@r.MontoTotal.ToString("C0")</td>
+                        <td>
+
+
+                            <a href="/editar-reservacion/@r.Id" class="btn btn-info">
+                                <i class="far fa-edit"></i>
+                            </a>
+                            <button @onclick="() => Borrar(r)" class="btn btn-danger">
+                                <i class="far fa-trash-alt"></i>
+                            </button>
+
+                        </td>
+                    </tr>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+
+
+
+
+<svg class="wavessss" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+    <path fill="#00cba9" fill-opacity="1"
+        d="M0,32L16,53.3C32,75,64,117,96,144C128,171,160,181,192,176C224,171,256,149,288,128C320,107,352,85,384,85.3C416,85,448,107,480,149.3C512,192,544,256,576,245.3C608,235,640,149,672,106.7C704,64,736,64,768,80C800,96,832,128,864,170.7C896,213,928,267,960,272C992,277,1024,235,1056,197.3C1088,160,1120,128,1152,128C1184,128,1216,160,1248,160C1280,160,1312,128,1344,106.7C1376,85,1408,75,1424,69.3L1440,64L1440,320L1424,320C1408,320,1376,320,1344,320C1312,320,1280,320,1248,320C1216,320,1184,320,1152,320C1120,320,1088,320,1056,320C1024,320,992,320,960,320C928,320,896,320,864,320C832,320,800,320,768,320C736,320,704,320,672,320C640,320,608,320,576,320C544,320,512,320,480,320C448,320,416,320,384,320C352,320,320,320,288,320C256,320,224,320,192,320C160,320,128,320,96,320C64,320,32,320,16,320L0,320Z">
+    </path>
+</svg>
+
+
+
+@code
+{
+    private List<Reservacion> reservaciones = null;
+    private List<Reservacion> reservacionesFiltradas = null;
+
+    private string campoFiltro = "Estado";
+    private string textoFiltro = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservacionesFiltradas = reservaciones = await sc.Reservaciones.Include("Cliente").Include("Vehiculo").ToListAsync();
+    }
+
+    private void filtrarReservaciones(ChangeEventArgs e)
+    {
+        textoFiltro = e.Value.ToString();
+        reservacionesFiltradas = reservaciones.FindAll(
+        r => r.GetPropertyValue<String>(campoFiltro)
+        .ToLower().Contains(textoFiltro.ToLower()));
+    }
+
+    private async Task Borrar(Reservacion r)
+    {
+        var result = await Swal.FireAsync(new SweetAlertOptions()
+        {
+            Title = "Esta seguro que desea eliminar la Reservacion?",
+            Icon = SweetAlertIcon.Error,
+            Html = $"{r.FechaInicioCorta} - {r.FechaFinCorta} <br>"
+                + $"{r.Cliente.NombreCompleto} <br>"
+                + $"{r.Vehiculo.Informacion}",
+            ShowCancelButton = true,
+            ConfirmButtonText = "Borrar",
+            ConfirmButtonColor = "#dc3545",
+            CancelButtonText = "Cancelar",
+            CancelButtonColor = "#28a745"
+        });
+
+        if (!string.IsNullOrEmpty(result.Value))
+        {
+            sc.Remove(r);
+            reservaciones.Remove(r);
+            await sc.SaveChangesAsync();
+
+            await Swal.FireAsync(new SweetAlertOptions() {
+                Icon = SweetAlertIcon.Warning,
+                Title = "Borrado",
+                Html = $"La Reservacion del {r.FechaInicioCorta} - {r.FechaFinCorta}"
+                    + $"<br> de {r.Cliente.NombreCompleto} ha sido borrada",
+            });
+        }
+    }
+
+
+    private async Task Pagando(Reservacion r)
+    {
+        var MontoDebido = r.MontoTotal - r.MontoPagado;
+
+        var result = await Swal.FireAsync(new SweetAlertOptions()
+        {
+            Title = "Cuanto desea pagar?",
+            Input = "number",
+            Html = $"<div class='alert alert-success'>Precio total de la reservacion <button class='btn btn-success' disabled>{r.MontoTotal}</div></button> "
+                + $" <div class='alert alert-info'>Cantidad que ha pagado es --<button class='btn btn-info' disabled> {r.MontoPagado}</button> --</div>"
+                + $" <div class='alert alert-danger'>Cantidad que debe <button class='btn btn-danger' disabled>{MontoDebido}</button></div>",
+            ShowCancelButton = true,
+            ConfirmButtonText = "Pagar",
+            CancelButtonText = "Cancelar"
+        });
+
+
+        if (!string.IsNullOrEmpty(result.Value))
+        {
+            var MontoAbonado = Convert.ToInt32(result.Value);
+
+            if (MontoDebido < MontoAbonado) {
+                await Swal.FireAsync(new SweetAlertOptions() {
+                    Icon = SweetAlertIcon.Error,
+                    Title = "Monto Superior a la Deuda",
+                    Text = "El Monto Abonado es mayor a lo que debe el Cliente. Intente de nuevo",
+                });
+
+                await Pagando(r);
+                return;
+            }
+
+            r.MontoPagado += MontoAbonado;
+            await sc.SaveChangesAsync();
+
+            await Swal.FireAsync(new SweetAlertOptions()
+            {
+                Icon = SweetAlertIcon.Success,
+                Title = $"Abonado {MontoAbonado.ToString("C0")}",
+                Html = $"Se ha aumento en {MontoAbonado}</br> "
+                    + $"La Reservacion del {r.FechaInicioCorta} - {r.FechaFinCorta}"
+                    + $"<br> de {r.Cliente.NombreCompleto} <br><br>"
+                    + $"Ahora debe {MontoDebido.ToString("C0")}"
+            });
+        }
+    }
+
+}

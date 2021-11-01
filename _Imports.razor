@@ -1,0 +1,22 @@
+﻿@using System.Net.Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Microsoft.EntityFrameworkCore
+@using Proyecto_final
+@using Proyecto_final.Shared
+@using Proyecto_final.Data
+@using Proyecto_final.Data.Models
+@using BlazorLeaflet
+@using BlazorLeaflet.Models
+@using BlazorLeaflet.Models.Events
+@using CurrieTechnologies.Razor.SweetAlert2
+
+@inject SistemaDbContext sc
+@inject IJSRuntime jsr
+@inject NavigationManager nm
+@inject SweetAlertService Swal
